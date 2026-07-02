@@ -1,6 +1,5 @@
 package com.accenture.ems.emstraining.model.entity;
 
-import lombok.Data;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,23 +10,15 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.time.Instant;
 
 @Entity
-@Table(name = "training")
-@Data
-public class Training {
+@Table(name = "training_details")
+public class TrainingDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
-    @Column(name = "name")
-    private String name;
-    @Column(name = "start_date")
-    private Instant startDate;
-    @Column(name = "end_date")
-    private Instant endDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "training_type_id", nullable = false)
-    private TrainingType trainingType;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "training_id", nullable = false)
+    private Training training;
 }
