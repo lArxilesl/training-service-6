@@ -10,8 +10,7 @@ import com.accenture.ems.emstraining.repository.TrainingDetailsRepository;
 import com.accenture.ems.emstraining.repository.TrainingRepository;
 import com.accenture.ems.emstraining.repository.TrainingTypeRepository;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +19,12 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TrainingService {
     private final TrainingRepository repository;
     private final TrainingDetailsRepository detailsRepository;
     private final TrainingTypeRepository typeRepository;
     private final TrainingMapper mapper;
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Transactional(readOnly = true)
     public Optional<TrainingResponseDTO> getById(Long id) {
@@ -84,7 +83,8 @@ public class TrainingService {
 
         Optional<TrainingType> typeOptional = typeRepository.findById(postDTO.getTrainingTypeId());
         if (!typeOptional.isPresent()) {
-            log.info("updateById(): attempt to create training with an invalid type id={}", postDTO.getTrainingTypeId());
+            log.info("updateById(): attempt to create training with an invalid type id={}",
+                    postDTO.getTrainingTypeId());
             throw new DependentEntityException(String.format("Training type was not found with id %d",
                     postDTO.getTrainingTypeId()));
         }
