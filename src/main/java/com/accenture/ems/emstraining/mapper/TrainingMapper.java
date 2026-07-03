@@ -6,6 +6,7 @@ import com.accenture.ems.emstraining.model.dto.TrainingTypeResponseDTO;
 import com.accenture.ems.emstraining.model.entity.Training;
 import com.accenture.ems.emstraining.model.entity.TrainingType;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import java.util.List;
@@ -18,7 +19,11 @@ public interface TrainingMapper {
 
     List<TrainingResponseDTO> toResponseDTO(List<Training> entities);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "trainingType", ignore = true)
     Training toEntity(TrainingPostDTO postDTO);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "trainingType", ignore = true)
     void updateEntityFromPostDTO(TrainingPostDTO postDTO, @MappingTarget Training entity);
 }
