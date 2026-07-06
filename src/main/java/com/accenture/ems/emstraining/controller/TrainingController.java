@@ -38,7 +38,7 @@ public class TrainingController {
 
     @ApiOperation("Get Training By Id")
     @ApiResponses({@ApiResponse(code = 200, message = HTMLResponseMessages.HTTP_200, response =
-            TrainingResponseDTO.class), @ApiResponse(code = 404, message = HTMLResponseMessages.HTTP_404),})
+            TrainingResponseDTO.class), @ApiResponse(code = 404, message = HTMLResponseMessages.HTTP_404)})
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
     public ResponseEntity<TrainingResponseDTO> getById(@NotNull @PathVariable Long id) {
@@ -56,7 +56,7 @@ public class TrainingController {
 
     @ApiOperation("Get all Trainings")
     @ApiResponses({@ApiResponse(code = 200, message = HTMLResponseMessages.HTTP_200, response =
-            TrainingResponseDTO.class, responseContainer = "List"),})
+            TrainingResponseDTO.class, responseContainer = "List")})
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public ResponseEntity<List<TrainingResponseDTO>> getAll() {
@@ -74,7 +74,7 @@ public class TrainingController {
 
     @ApiOperation("Create Training")
     @ApiResponses({@ApiResponse(code = 201, message = HTMLResponseMessages.HTTP_201, response =
-            TrainingResponseDTO.class), @ApiResponse(code = 400, message = HTMLResponseMessages.HTTP_400),})
+            TrainingResponseDTO.class), @ApiResponse(code = 400, message = HTMLResponseMessages.HTTP_400)})
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public ResponseEntity<TrainingResponseDTO> create(@Valid @RequestBody TrainingPostDTO postDTO) {
@@ -86,7 +86,7 @@ public class TrainingController {
     @ApiOperation(value = "Update Training by Id")
     @ApiResponses({@ApiResponse(code = 201, message = HTMLResponseMessages.HTTP_201, response =
             TrainingResponseDTO.class), @ApiResponse(code = 400, message = HTMLResponseMessages.HTTP_400),
-            @ApiResponse(code = 404, message = HTMLResponseMessages.HTTP_404),})
+            @ApiResponse(code = 404, message = HTMLResponseMessages.HTTP_404)})
     @ResponseStatus(HttpStatus.CREATED)
     @PutMapping("/{id}")
     public ResponseEntity<TrainingResponseDTO> update(@NotNull @PathVariable Long id,
