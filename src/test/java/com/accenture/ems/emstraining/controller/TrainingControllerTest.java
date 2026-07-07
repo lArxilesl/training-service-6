@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -122,7 +121,7 @@ public class TrainingControllerTest {
     @Test
     public void testOkDeleteById() throws Exception {
         Long nonEmptyId = 10L;
-        when(service.deleteById(eq(nonEmptyId))).thenReturn(true);
+        when(service.deleteById(nonEmptyId)).thenReturn(true);
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/api/v1/training/{id}", nonEmptyId);
         mockMvc
@@ -134,7 +133,7 @@ public class TrainingControllerTest {
     @Test
     public void testEmptyDeleteById() throws Exception {
         Long emptyId = 10L;
-        when(service.deleteById(eq(emptyId))).thenReturn(false);
+        when(service.deleteById(emptyId)).thenReturn(false);
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/api/v1/training/{id}", emptyId);
 
@@ -146,7 +145,7 @@ public class TrainingControllerTest {
 
     @Test
     public void testOkCreate() throws Exception {
-        when(service.create(eq(mockTrainingDTO))).thenReturn(mockTrainingDTO);
+        when(service.create(mockTrainingDTO)).thenReturn(mockTrainingDTO);
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/api/v1/training")
@@ -170,7 +169,7 @@ public class TrainingControllerTest {
 
     @Test
     public void testOkUpdateById() throws Exception {
-        when(service.updateById(eq(mockTrainingDTO.getId()), eq(mockTrainingDTO))).thenReturn(Optional.of(mockTrainingDTO));
+        when(service.updateById(mockTrainingDTO.getId(), mockTrainingDTO)).thenReturn(Optional.of(mockTrainingDTO));
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .put("/api/v1/training/{id}", mockTrainingDTO.getId())
@@ -194,7 +193,7 @@ public class TrainingControllerTest {
 
     @Test
     public void testWrongTypeUpdateById() throws Exception {
-        when(service.updateById(eq(mockTrainingDTO.getId()), eq(mockTrainingDTO))).thenReturn(Optional.empty());
+        when(service.updateById(mockTrainingDTO.getId(), mockTrainingDTO)).thenReturn(Optional.empty());
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .put("/api/v1/training/{id}", mockTrainingDTO.getId())

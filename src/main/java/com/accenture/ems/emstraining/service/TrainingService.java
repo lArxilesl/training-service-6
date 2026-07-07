@@ -4,10 +4,10 @@ import com.accenture.ems.emstraining.exception.DependentEntityException;
 import com.accenture.ems.emstraining.mapper.TrainingMapper;
 import com.accenture.ems.emstraining.model.dto.TrainingDTO;
 import com.accenture.ems.emstraining.model.entity.Training;
-import com.accenture.ems.emstraining.repository.TrainingDetailsRepository;
 import com.accenture.ems.emstraining.repository.TrainingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,8 +19,6 @@ import java.util.Optional;
 @Slf4j
 public class TrainingService {
     private final TrainingRepository repository;
-    private final TrainingDetailsRepository detailsRepository;
-//    private final TrainingTypeRepository typeRepository;
     private final TrainingMapper mapper;
 
     @Transactional(readOnly = true)
@@ -57,19 +55,17 @@ public class TrainingService {
     public TrainingDTO create(TrainingDTO trainingDTO) throws RuntimeException {
         log.info("create(): creating training");
 
-//        Optional<TrainingType> typeOptional = typeRepository.findById(trainingDTO.getTrainingTypeId());
-//        if (!typeOptional.isPresent()) {
-//            log.info("create(): attempt to create training with an invalid type id={}",
-//                    trainingDTO.getTrainingTypeId());
-//            throw new DependentEntityException(String.format("Training type was not found with id %d",
-//                    trainingDTO.getTrainingTypeId()));
-//        }
 
-//        TrainingType type = typeOptional.get();
         Training entity = mapper.toEntity(trainingDTO);
 
-//        entity.setTrainingType(type);
-        entity = repository.save(entity);
+        try {
+            entity = repository.saveAndFlush(entity);
+        } catch (DataIntegrityViolationException e) {
+            log.info("create(): attempt to create training with an invalid type id={}",
+                    trainingDTO.getTrainingTypeId());
+            throw new DependentEntityException(String.format("Training type was not found with id %d",
+                    trainingDTO.getTrainingTypeId()), e);
+        }
 
         log.info("create(): created training entity with id={}", entity.getId());
         return mapper.toDTO(entity);
@@ -79,27 +75,24 @@ public class TrainingService {
     public Optional<TrainingDTO> updateById(Long id, TrainingDTO trainingDTO) throws RuntimeException {
         log.info("updateById(): updating training");
 
-//        Optional<TrainingType> typeOptional = typeRepository.findById(trainingDTO.getTrainingTypeId());
-//        if (!typeOptional.isPresent()) {
-//            log.info("updateById(): attempt to create training with an invalid type id={}",
-//                    trainingDTO.getTrainingTypeId());
-//            throw new DependentEntityException(String.format("Training type was not found with id %d",
-//                    trainingDTO.getTrainingTypeId()));
-//        }
-
         Optional<Training> oldEntityOptional = repository.findById(id);
         if (!oldEntityOptional.isPresent()) {
             log.info("updateById(): attempt to update nonexistent training entity with id={}", id);
             return Optional.empty();
         }
 
-//        TrainingType type = typeOptional.get();
         Training oldEntity = oldEntityOptional.get();
 
         mapper.updateEntityFromDTO(trainingDTO, oldEntity);
 
-//        oldEntity.setTrainingType(type);
-        oldEntity = repository.save(oldEntity);
+        try {
+            oldEntity = repository.saveAndFlush(oldEntity);
+        } catch (DataIntegrityViolationException e) {
+            log.info("updateById(): attempt to create training with an invalid type id={}",
+                    trainingDTO.getTrainingTypeId());
+            throw new DependentEntityException(String.format("Training type was not found with id %d",
+                    trainingDTO.getTrainingTypeId()), e);
+        }
 
         log.info("updateById(): updated training entity with id={}", oldEntity.getId());
         return Optional.of(mapper.toDTO(oldEntity));
@@ -117,13 +110,14 @@ public class TrainingService {
 
         Training entity = entityOptional.get();
 
-        if (detailsRepository.existsByTrainingId(id)) {
+        try {
+            repository.delete(entity);
+            repository.flush();
+        } catch (DataIntegrityViolationException e) {
             log.info("deleteById(): attempt to delete training with id={} which is reference by training details", id);
             throw new DependentEntityException("Training couldn't be deleted because it was referenced by some " +
-                    "training details");
+                    "training details", e);
         }
-
-        repository.delete(entity);
 
         log.info("deleteById(): deleted training entity with id={}", id);
         return true;

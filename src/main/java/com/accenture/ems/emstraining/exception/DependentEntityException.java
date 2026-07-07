@@ -8,4 +8,8 @@ public class DependentEntityException extends RuntimeException {
     public DependentEntityException(String message) {
         super(message);
     }
+
+    public DependentEntityException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

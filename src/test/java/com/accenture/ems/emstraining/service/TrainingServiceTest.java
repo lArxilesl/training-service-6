@@ -4,9 +4,7 @@ import com.accenture.ems.emstraining.exception.DependentEntityException;
 import com.accenture.ems.emstraining.mapper.TrainingMapper;
 import com.accenture.ems.emstraining.model.dto.TrainingDTO;
 import com.accenture.ems.emstraining.model.entity.Training;
-import com.accenture.ems.emstraining.repository.TrainingDetailsRepository;
 import com.accenture.ems.emstraining.repository.TrainingRepository;
-import com.accenture.ems.emstraining.repository.TrainingTypeRepository;
 import com.rits.cloning.Cloner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -28,8 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,16 +35,14 @@ public class TrainingServiceTest {
     private final Cloner cloner = new Cloner();
     @Mock
     private TrainingRepository repository;
-    @Mock
-    private TrainingDetailsRepository detailsRepository;
-    @Mock
-    private TrainingTypeRepository typeRepository;
     @InjectMocks
     private TrainingService service;
     @Spy
     private TrainingMapper mapper = Mappers.getMapper(TrainingMapper.class);
     private Training mockTraining;
+    private Training mockTrainingWithoutId;
     private TrainingDTO mockTrainingDTO;
+    private TrainingDTO mockTrainingDTOWithoutId;
 
     @BeforeEach
     public void setUp() {
@@ -59,6 +55,12 @@ public class TrainingServiceTest {
                 .trainingTypeId(1L)
                 .build();
         mockTrainingDTO = mapper.toDTO(mockTraining);
+
+        mockTrainingWithoutId = cloner.deepClone(mockTraining);
+        mockTrainingWithoutId.setId(null);
+
+        mockTrainingDTOWithoutId = cloner.deepClone(mockTrainingDTO);
+        mockTrainingDTOWithoutId.setId(null);
     }
 
     @Test
@@ -80,43 +82,48 @@ public class TrainingServiceTest {
     @Test
     public void testGetAllEmpty() {
         when(repository.findAll()).thenReturn(Collections.emptyList());
-        assertEquals(Collections.emptyList(), service.getAll());
+
+        List<TrainingDTO> actual = service.getAll();
+
+        assertEquals(Collections.emptyList(), actual);
     }
 
     @Test
     public void testGetByIdOk() {
-        when(repository.findById(eq(mockTraining.getId()))).thenReturn(Optional.of(mockTraining));
+        when(repository.findById(mockTraining.getId())).thenReturn(Optional.of(mockTraining));
 
-        assertEquals(Optional.of(mockTrainingDTO), service.getById(mockTraining.getId()));
+        Optional<TrainingDTO> actual = service.getById(mockTraining.getId());
+
+        assertEquals(Optional.of(mockTrainingDTO), actual);
     }
 
     @Test
     public void testGetByIdEmpty() {
-        when(repository.findById(anyLong())).thenReturn(Optional.empty());
+        Long emptyId = 1L;
 
-        assertEquals(Optional.empty(), service.getById(1L));
+        when(repository.findById(emptyId)).thenReturn(Optional.empty());
+
+        Optional<TrainingDTO> actual = service.getById(emptyId);
+
+        assertEquals(Optional.empty(), actual);
     }
 
     @Test
     public void testCreateOk() {
-        Training mockTrainingWithNullId = cloner.deepClone(mockTraining);
-        mockTrainingWithNullId.setId(null);
+        when(repository.saveAndFlush(mockTrainingWithoutId)).thenReturn(mockTraining);
 
-        when(repository.save(eq(mockTrainingWithNullId))).thenReturn(mockTraining);
-//        when(typeRepository.findById(mockTrainingType.getId())).thenReturn(Optional.of(mockTrainingType));
+        TrainingDTO actual = service.create(mockTrainingDTOWithoutId);
 
-        assertEquals(mockTrainingDTO, service.create(mockTrainingDTO));
+        assertEquals(mockTrainingDTO, actual);
     }
 
     @Test
     public void testCreateBadType() {
-        Long badTypeId = 999L;
-        TrainingDTO mockTrainingDTOWithBadTypeId = cloner.deepClone(mockTrainingDTO);
-        mockTrainingDTOWithBadTypeId.setTrainingTypeId(badTypeId);
+        doThrow(DataIntegrityViolationException.class)
+                .when(repository)
+                .saveAndFlush(mockTrainingWithoutId);
 
-        when(typeRepository.findById(eq(badTypeId))).thenReturn(Optional.empty());
-
-        assertThrows(DependentEntityException.class, () -> service.create(mockTrainingDTOWithBadTypeId));
+        assertThrows(DependentEntityException.class, () -> service.create(mockTrainingDTOWithoutId));
     }
 
     @Test
@@ -126,13 +133,11 @@ public class TrainingServiceTest {
         updatedEntity.setStartDate(Instant.EPOCH.plus(2, ChronoUnit.DAYS));
         TrainingDTO updatedTrainingDTO = mapper.toDTO(updatedEntity);
 
+        // old entity check
         when(repository.findById(mockTraining.getId())).thenReturn(Optional.of(mockTraining));
-        when(repository.save(updatedEntity)).thenReturn(updatedEntity);
-//        when(typeRepository.findById(eq(mockTrainingType.getId()))).thenReturn(Optional.of(mockTrainingType));
-
+        when(repository.saveAndFlush(updatedEntity)).thenReturn(updatedEntity);
 
         Optional<TrainingDTO> actual = service.updateById(updatedEntity.getId(), updatedTrainingDTO);
-
 
         assertEquals(Optional.of(updatedTrainingDTO), actual);
     }
@@ -141,12 +146,9 @@ public class TrainingServiceTest {
     public void testUpdateByIdEmpty() {
         Long emptyId = 1L;
 
-        when(repository.findById(eq(emptyId))).thenReturn(Optional.empty());
-//        when(typeRepository.findById(eq(mockTrainingType.getId()))).thenReturn(Optional.of(mockTrainingType));
-
+        when(repository.findById(emptyId)).thenReturn(Optional.empty());
 
         Optional<TrainingDTO> actual = service.updateById(emptyId, mockTrainingDTO);
-
 
         assertEquals(Optional.empty(), actual);
     }
@@ -156,8 +158,13 @@ public class TrainingServiceTest {
         Long badTypeId = 999L;
         TrainingDTO mockTrainingDTOWithBadTypeId = cloner.deepClone(mockTrainingDTO);
         mockTrainingDTOWithBadTypeId.setTrainingTypeId(badTypeId);
+        Training mockTrainingWithBadTypeId = mapper.toEntity(mockTrainingDTOWithBadTypeId);
+        mockTrainingWithBadTypeId.setId(1L);
 
-        when(typeRepository.findById(eq(badTypeId))).thenReturn(Optional.empty());
+        when(repository.findById(mockTraining.getId())).thenReturn(Optional.of(mockTraining));
+        doThrow(DataIntegrityViolationException.class)
+                .when(repository)
+                .saveAndFlush(mockTrainingWithBadTypeId);
 
         assertThrows(DependentEntityException.class, () -> service.updateById(mockTraining.getId(),
                 mockTrainingDTOWithBadTypeId));
@@ -180,8 +187,10 @@ public class TrainingServiceTest {
 
     @Test
     public void testDeleteByIdDependent() {
-        when(detailsRepository.existsByTrainingId(mockTraining.getId())).thenReturn(true);
         when(repository.findById(mockTraining.getId())).thenReturn(Optional.of(mockTraining));
+        doThrow(DataIntegrityViolationException.class)
+                .when(repository)
+                .delete(mockTraining);
 
         assertThrows(DependentEntityException.class, () -> service.deleteById(mockTraining.getId()));
     }
