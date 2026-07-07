@@ -1,7 +1,6 @@
 package com.accenture.ems.emstraining.controller;
 
-import com.accenture.ems.emstraining.model.dto.TrainingPostDTO;
-import com.accenture.ems.emstraining.model.dto.TrainingResponseDTO;
+import com.accenture.ems.emstraining.model.dto.TrainingDTO;
 import com.accenture.ems.emstraining.service.TrainingService;
 import com.accenture.ems.emstraining.swagger.DescriptionVariables;
 import com.accenture.ems.emstraining.swagger.HTMLResponseMessages;
@@ -37,14 +36,14 @@ public class TrainingController {
     private final TrainingService service;
 
     @ApiOperation("Get Training By Id")
-    @ApiResponses({@ApiResponse(code = 200, message = HTMLResponseMessages.HTTP_200, response =
-            TrainingResponseDTO.class), @ApiResponse(code = 404, message = HTMLResponseMessages.HTTP_404)})
+    @ApiResponses({@ApiResponse(code = 200, message = HTMLResponseMessages.HTTP_200, response = TrainingDTO.class),
+            @ApiResponse(code = 404, message = HTMLResponseMessages.HTTP_404)})
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public ResponseEntity<TrainingResponseDTO> getById(@NotNull @PathVariable Long id) {
+    public ResponseEntity<TrainingDTO> getById(@NotNull @PathVariable Long id) {
         log.info("getById(): retrieving training with id={}", id);
 
-        Optional<TrainingResponseDTO> responseDTO = service.getById(id);
+        Optional<TrainingDTO> responseDTO = service.getById(id);
         if (!responseDTO.isPresent()) {
             log.info("getById(): training with id={} not found", id);
         } else {
@@ -55,14 +54,14 @@ public class TrainingController {
     }
 
     @ApiOperation("Get all Trainings")
-    @ApiResponses({@ApiResponse(code = 200, message = HTMLResponseMessages.HTTP_200, response =
-            TrainingResponseDTO.class, responseContainer = "List")})
+    @ApiResponses({@ApiResponse(code = 200, message = HTMLResponseMessages.HTTP_200, response = TrainingDTO.class,
+            responseContainer = "List")})
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public ResponseEntity<List<TrainingResponseDTO>> getAll() {
+    public ResponseEntity<List<TrainingDTO>> getAll() {
         log.info("getAll(): retrieving all training entities");
 
-        List<TrainingResponseDTO> responseDTOs = service.getAll();
+        List<TrainingDTO> responseDTOs = service.getAll();
         if (responseDTOs.isEmpty()) {
             log.info("getAll(): returning empty training list");
         } else {
@@ -73,27 +72,27 @@ public class TrainingController {
     }
 
     @ApiOperation("Create Training")
-    @ApiResponses({@ApiResponse(code = 201, message = HTMLResponseMessages.HTTP_201, response =
-            TrainingResponseDTO.class), @ApiResponse(code = 400, message = HTMLResponseMessages.HTTP_400)})
+    @ApiResponses({@ApiResponse(code = 201, message = HTMLResponseMessages.HTTP_201, response = TrainingDTO.class),
+            @ApiResponse(code = 400, message = HTMLResponseMessages.HTTP_400)})
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public ResponseEntity<TrainingResponseDTO> create(@Valid @RequestBody TrainingPostDTO postDTO) {
+    public ResponseEntity<TrainingDTO> create(@Valid @RequestBody TrainingDTO trainingDTO) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(service.create(postDTO));
+                .body(service.create(trainingDTO));
     }
 
     @ApiOperation(value = "Update Training by Id")
-    @ApiResponses({@ApiResponse(code = 201, message = HTMLResponseMessages.HTTP_201, response =
-            TrainingResponseDTO.class), @ApiResponse(code = 400, message = HTMLResponseMessages.HTTP_400),
-            @ApiResponse(code = 404, message = HTMLResponseMessages.HTTP_404)})
+    @ApiResponses({@ApiResponse(code = 201, message = HTMLResponseMessages.HTTP_201, response = TrainingDTO.class),
+            @ApiResponse(code = 400, message = HTMLResponseMessages.HTTP_400), @ApiResponse(code = 404, message =
+            HTMLResponseMessages.HTTP_404)})
     @ResponseStatus(HttpStatus.CREATED)
     @PutMapping("/{id}")
-    public ResponseEntity<TrainingResponseDTO> update(@NotNull @PathVariable Long id,
-                                                      @Valid @RequestBody TrainingPostDTO postDTO) {
+    public ResponseEntity<TrainingDTO> update(@NotNull @PathVariable Long id,
+                                              @Valid @RequestBody TrainingDTO trainingDTO) {
         log.info("update(): updating training with id={}", id);
 
-        Optional<TrainingResponseDTO> responseDTO = service.updateById(id, postDTO);
+        Optional<TrainingDTO> responseDTO = service.updateById(id, trainingDTO);
         if (!responseDTO.isPresent()) {
             log.info("update(): training with id={} not found", id);
             return ResponseEntity
@@ -112,7 +111,7 @@ public class TrainingController {
             HTMLResponseMessages.HTTP_404)})
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<TrainingResponseDTO> delete(@NotNull @PathVariable Long id) {
+    public ResponseEntity<TrainingDTO> delete(@NotNull @PathVariable Long id) {
         log.info("delete(): deleting training with id={}", id);
 
         boolean success = service.deleteById(id);

@@ -2,10 +2,8 @@ package com.accenture.ems.emstraining.service;
 
 import com.accenture.ems.emstraining.exception.DependentEntityException;
 import com.accenture.ems.emstraining.mapper.TrainingMapper;
-import com.accenture.ems.emstraining.model.dto.TrainingPostDTO;
-import com.accenture.ems.emstraining.model.dto.TrainingResponseDTO;
+import com.accenture.ems.emstraining.model.dto.TrainingDTO;
 import com.accenture.ems.emstraining.model.entity.Training;
-import com.accenture.ems.emstraining.model.entity.TrainingType;
 import com.accenture.ems.emstraining.repository.TrainingDetailsRepository;
 import com.accenture.ems.emstraining.repository.TrainingRepository;
 import com.accenture.ems.emstraining.repository.TrainingTypeRepository;
@@ -48,9 +46,7 @@ public class TrainingServiceTest {
     @Spy
     private TrainingMapper mapper = Mappers.getMapper(TrainingMapper.class);
     private Training mockTraining;
-    private TrainingType mockTrainingType;
-    private TrainingPostDTO mockTrainingPostDTO;
-    private TrainingResponseDTO mockTrainingResponseDTO;
+    private TrainingDTO mockTrainingDTO;
 
     @BeforeEach
     public void setUp() {
@@ -60,24 +56,9 @@ public class TrainingServiceTest {
                 .name("Test Course")
                 .startDate(Instant.EPOCH)
                 .endDate(Instant.MAX)
-                .trainingType(TrainingType
-                        .builder()
-                        .id(1L)
-                        .type("type1")
-                        .build())
+                .trainingTypeId(1L)
                 .build();
-        mockTrainingType = mockTraining.getTrainingType();
-        mockTrainingResponseDTO = mapper.toResponseDTO(mockTraining);
-        // didn't want to add mapstruct method just for a test
-        mockTrainingPostDTO = TrainingPostDTO
-                .builder()
-                .name(mockTraining.getName())
-                .startDate(mockTraining.getStartDate())
-                .endDate(mockTraining.getEndDate())
-                .trainingTypeId(mockTraining
-                        .getTrainingType()
-                        .getId())
-                .build();
+        mockTrainingDTO = mapper.toDTO(mockTraining);
     }
 
     @Test
@@ -85,33 +66,33 @@ public class TrainingServiceTest {
         Training mockTrainingSecond = cloner.deepClone(mockTraining);
         mockTrainingSecond.setId(2L);
         mockTrainingSecond.setName("Test Course Second");
+        TrainingDTO mockSecondTrainingDTO = mapper.toDTO(mockTrainingSecond);
 
-        List<TrainingResponseDTO> expected = Arrays.asList(mockTrainingResponseDTO,
-                mapper.toResponseDTO(mockTrainingSecond));
+        List<TrainingDTO> expected = Arrays.asList(mockTrainingDTO, mockSecondTrainingDTO);
 
-        when(repository.findAllWithType()).thenReturn(Arrays.asList(mockTraining, mockTrainingSecond));
+        when(repository.findAll()).thenReturn(Arrays.asList(mockTraining, mockTrainingSecond));
 
-        List<TrainingResponseDTO> actual = service.getAll();
+        List<TrainingDTO> actual = service.getAll();
 
         assertEquals(expected, actual);
     }
 
     @Test
     public void testGetAllEmpty() {
-        when(repository.findAllWithType()).thenReturn(Collections.emptyList());
+        when(repository.findAll()).thenReturn(Collections.emptyList());
         assertEquals(Collections.emptyList(), service.getAll());
     }
 
     @Test
     public void testGetByIdOk() {
-        when(repository.findByIdWithType(eq(mockTraining.getId()))).thenReturn(Optional.of(mockTraining));
+        when(repository.findById(eq(mockTraining.getId()))).thenReturn(Optional.of(mockTraining));
 
-        assertEquals(Optional.of(mockTrainingResponseDTO), service.getById(mockTraining.getId()));
+        assertEquals(Optional.of(mockTrainingDTO), service.getById(mockTraining.getId()));
     }
 
     @Test
     public void testGetByIdEmpty() {
-        when(repository.findByIdWithType(anyLong())).thenReturn(Optional.empty());
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertEquals(Optional.empty(), service.getById(1L));
     }
@@ -122,41 +103,38 @@ public class TrainingServiceTest {
         mockTrainingWithNullId.setId(null);
 
         when(repository.save(eq(mockTrainingWithNullId))).thenReturn(mockTraining);
-        when(typeRepository.findById(mockTrainingType.getId())).thenReturn(Optional.of(mockTrainingType));
+//        when(typeRepository.findById(mockTrainingType.getId())).thenReturn(Optional.of(mockTrainingType));
 
-        assertEquals(mockTrainingResponseDTO, service.create(mockTrainingPostDTO));
+        assertEquals(mockTrainingDTO, service.create(mockTrainingDTO));
     }
 
     @Test
     public void testCreateBadType() {
         Long badTypeId = 999L;
-        TrainingPostDTO mockTrainingPostDTOWithBadTypeId = cloner.deepClone(mockTrainingPostDTO);
-        mockTrainingPostDTOWithBadTypeId.setTrainingTypeId(badTypeId);
+        TrainingDTO mockTrainingDTOWithBadTypeId = cloner.deepClone(mockTrainingDTO);
+        mockTrainingDTOWithBadTypeId.setTrainingTypeId(badTypeId);
 
         when(typeRepository.findById(eq(badTypeId))).thenReturn(Optional.empty());
 
-        assertThrows(DependentEntityException.class, () -> service.create(mockTrainingPostDTOWithBadTypeId));
+        assertThrows(DependentEntityException.class, () -> service.create(mockTrainingDTOWithBadTypeId));
     }
 
     @Test
     public void testUpdateByIdOk() {
-        TrainingPostDTO updatedTrainingPostDTO = cloner.deepClone(mockTrainingPostDTO);
-        updatedTrainingPostDTO.setName("Test Course Updated");
-        updatedTrainingPostDTO.setStartDate(Instant.EPOCH.plus(2, ChronoUnit.DAYS));
         Training updatedEntity = cloner.deepClone(mockTraining);
-        updatedEntity.setName(updatedTrainingPostDTO.getName());
-        updatedEntity.setStartDate(updatedTrainingPostDTO.getStartDate());
-        TrainingResponseDTO updatedTrainingResponseDTO = mapper.toResponseDTO(updatedEntity);
+        updatedEntity.setName("Test Course Updated");
+        updatedEntity.setStartDate(Instant.EPOCH.plus(2, ChronoUnit.DAYS));
+        TrainingDTO updatedTrainingDTO = mapper.toDTO(updatedEntity);
 
         when(repository.findById(mockTraining.getId())).thenReturn(Optional.of(mockTraining));
         when(repository.save(updatedEntity)).thenReturn(updatedEntity);
-        when(typeRepository.findById(eq(mockTrainingType.getId()))).thenReturn(Optional.of(mockTrainingType));
+//        when(typeRepository.findById(eq(mockTrainingType.getId()))).thenReturn(Optional.of(mockTrainingType));
 
 
-        Optional<TrainingResponseDTO> actual = service.updateById(updatedEntity.getId(), updatedTrainingPostDTO);
+        Optional<TrainingDTO> actual = service.updateById(updatedEntity.getId(), updatedTrainingDTO);
 
 
-        assertEquals(Optional.of(updatedTrainingResponseDTO), actual);
+        assertEquals(Optional.of(updatedTrainingDTO), actual);
     }
 
     @Test
@@ -164,10 +142,10 @@ public class TrainingServiceTest {
         Long emptyId = 1L;
 
         when(repository.findById(eq(emptyId))).thenReturn(Optional.empty());
-        when(typeRepository.findById(eq(mockTrainingType.getId()))).thenReturn(Optional.of(mockTrainingType));
+//        when(typeRepository.findById(eq(mockTrainingType.getId()))).thenReturn(Optional.of(mockTrainingType));
 
 
-        Optional<TrainingResponseDTO> actual = service.updateById(emptyId, mockTrainingPostDTO);
+        Optional<TrainingDTO> actual = service.updateById(emptyId, mockTrainingDTO);
 
 
         assertEquals(Optional.empty(), actual);
@@ -176,13 +154,13 @@ public class TrainingServiceTest {
     @Test
     public void testUpdateByIdBadType() {
         Long badTypeId = 999L;
-        TrainingPostDTO mockTrainingPostDTOWithBadTypeId = cloner.deepClone(mockTrainingPostDTO);
-        mockTrainingPostDTOWithBadTypeId.setTrainingTypeId(badTypeId);
+        TrainingDTO mockTrainingDTOWithBadTypeId = cloner.deepClone(mockTrainingDTO);
+        mockTrainingDTOWithBadTypeId.setTrainingTypeId(badTypeId);
 
         when(typeRepository.findById(eq(badTypeId))).thenReturn(Optional.empty());
 
         assertThrows(DependentEntityException.class, () -> service.updateById(mockTraining.getId(),
-                mockTrainingPostDTOWithBadTypeId));
+                mockTrainingDTOWithBadTypeId));
     }
 
     @Test

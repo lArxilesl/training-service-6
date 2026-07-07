@@ -1,10 +1,7 @@
 package com.accenture.ems.emstraining.mapper;
 
-import com.accenture.ems.emstraining.model.dto.TrainingPostDTO;
-import com.accenture.ems.emstraining.model.dto.TrainingResponseDTO;
-import com.accenture.ems.emstraining.model.dto.TrainingTypeResponseDTO;
+import com.accenture.ems.emstraining.model.dto.TrainingDTO;
 import com.accenture.ems.emstraining.model.entity.Training;
-import com.accenture.ems.emstraining.model.entity.TrainingType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -13,17 +10,12 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface TrainingMapper {
-    TrainingResponseDTO toResponseDTO(Training entity);
-
-    TrainingTypeResponseDTO toResponseDTO(TrainingType entity);
-
-    List<TrainingResponseDTO> toResponseDTO(List<Training> entities);
+    TrainingDTO toDTO(Training entity);
+    List<TrainingDTO> toDTO(List<Training> entities);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "trainingType", ignore = true)
-    Training toEntity(TrainingPostDTO postDTO);
+    Training toEntity(TrainingDTO trainingDTO);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "trainingType", ignore = true)
-    void updateEntityFromPostDTO(TrainingPostDTO postDTO, @MappingTarget Training entity);
+    void updateEntityFromDTO(TrainingDTO trainingDTO, @MappingTarget Training entity);
 }

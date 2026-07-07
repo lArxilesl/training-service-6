@@ -2,13 +2,10 @@ package com.accenture.ems.emstraining.service;
 
 import com.accenture.ems.emstraining.exception.DependentEntityException;
 import com.accenture.ems.emstraining.mapper.TrainingMapper;
-import com.accenture.ems.emstraining.model.dto.TrainingPostDTO;
-import com.accenture.ems.emstraining.model.dto.TrainingResponseDTO;
+import com.accenture.ems.emstraining.model.dto.TrainingDTO;
 import com.accenture.ems.emstraining.model.entity.Training;
-import com.accenture.ems.emstraining.model.entity.TrainingType;
 import com.accenture.ems.emstraining.repository.TrainingDetailsRepository;
 import com.accenture.ems.emstraining.repository.TrainingRepository;
-import com.accenture.ems.emstraining.repository.TrainingTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,14 +20,14 @@ import java.util.Optional;
 public class TrainingService {
     private final TrainingRepository repository;
     private final TrainingDetailsRepository detailsRepository;
-    private final TrainingTypeRepository typeRepository;
+//    private final TrainingTypeRepository typeRepository;
     private final TrainingMapper mapper;
 
     @Transactional(readOnly = true)
-    public Optional<TrainingResponseDTO> getById(Long id) {
+    public Optional<TrainingDTO> getById(Long id) {
         log.info("getById(): retrieving training by id={}", id);
 
-        Optional<Training> training = repository.findByIdWithType(id);
+        Optional<Training> training = repository.findById(id);
 
         if (!training.isPresent()) {
             log.info("getById(): not found training by id={}", id);
@@ -38,14 +35,14 @@ public class TrainingService {
             log.info("getById(): found training by id={}", id);
         }
 
-        return training.map(mapper::toResponseDTO);
+        return training.map(mapper::toDTO);
     }
 
     @Transactional(readOnly = true)
-    public List<TrainingResponseDTO> getAll() {
+    public List<TrainingDTO> getAll() {
         log.info("getAll(): retrieving all trainings");
 
-        List<Training> trainings = repository.findAllWithType();
+        List<Training> trainings = repository.findAll();
 
         if (trainings.isEmpty()) {
             log.info("getAll(): no trainings found");
@@ -53,41 +50,42 @@ public class TrainingService {
             log.info("getAll(): returning training list with size={}", trainings.size());
         }
 
-        return mapper.toResponseDTO(trainings);
+        return mapper.toDTO(trainings);
     }
 
     @Transactional
-    public TrainingResponseDTO create(TrainingPostDTO postDTO) throws RuntimeException {
+    public TrainingDTO create(TrainingDTO trainingDTO) throws RuntimeException {
         log.info("create(): creating training");
 
-        Optional<TrainingType> typeOptional = typeRepository.findById(postDTO.getTrainingTypeId());
-        if (!typeOptional.isPresent()) {
-            log.info("create(): attempt to create training with an invalid type id={}", postDTO.getTrainingTypeId());
-            throw new DependentEntityException(String.format("Training type was not found with id %d",
-                    postDTO.getTrainingTypeId()));
-        }
+//        Optional<TrainingType> typeOptional = typeRepository.findById(trainingDTO.getTrainingTypeId());
+//        if (!typeOptional.isPresent()) {
+//            log.info("create(): attempt to create training with an invalid type id={}",
+//                    trainingDTO.getTrainingTypeId());
+//            throw new DependentEntityException(String.format("Training type was not found with id %d",
+//                    trainingDTO.getTrainingTypeId()));
+//        }
 
-        TrainingType type = typeOptional.get();
-        Training entity = mapper.toEntity(postDTO);
+//        TrainingType type = typeOptional.get();
+        Training entity = mapper.toEntity(trainingDTO);
 
-        entity.setTrainingType(type);
+//        entity.setTrainingType(type);
         entity = repository.save(entity);
 
         log.info("create(): created training entity with id={}", entity.getId());
-        return mapper.toResponseDTO(entity);
+        return mapper.toDTO(entity);
     }
 
     @Transactional
-    public Optional<TrainingResponseDTO> updateById(Long id, TrainingPostDTO postDTO) throws RuntimeException {
+    public Optional<TrainingDTO> updateById(Long id, TrainingDTO trainingDTO) throws RuntimeException {
         log.info("updateById(): updating training");
 
-        Optional<TrainingType> typeOptional = typeRepository.findById(postDTO.getTrainingTypeId());
-        if (!typeOptional.isPresent()) {
-            log.info("updateById(): attempt to create training with an invalid type id={}",
-                    postDTO.getTrainingTypeId());
-            throw new DependentEntityException(String.format("Training type was not found with id %d",
-                    postDTO.getTrainingTypeId()));
-        }
+//        Optional<TrainingType> typeOptional = typeRepository.findById(trainingDTO.getTrainingTypeId());
+//        if (!typeOptional.isPresent()) {
+//            log.info("updateById(): attempt to create training with an invalid type id={}",
+//                    trainingDTO.getTrainingTypeId());
+//            throw new DependentEntityException(String.format("Training type was not found with id %d",
+//                    trainingDTO.getTrainingTypeId()));
+//        }
 
         Optional<Training> oldEntityOptional = repository.findById(id);
         if (!oldEntityOptional.isPresent()) {
@@ -95,16 +93,16 @@ public class TrainingService {
             return Optional.empty();
         }
 
-        TrainingType type = typeOptional.get();
+//        TrainingType type = typeOptional.get();
         Training oldEntity = oldEntityOptional.get();
 
-        mapper.updateEntityFromPostDTO(postDTO, oldEntity);
+        mapper.updateEntityFromDTO(trainingDTO, oldEntity);
 
-        oldEntity.setTrainingType(type);
+//        oldEntity.setTrainingType(type);
         oldEntity = repository.save(oldEntity);
 
         log.info("updateById(): updated training entity with id={}", oldEntity.getId());
-        return Optional.of(mapper.toResponseDTO(oldEntity));
+        return Optional.of(mapper.toDTO(oldEntity));
     }
 
     @Transactional

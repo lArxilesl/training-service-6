@@ -1,14 +1,14 @@
 package com.accenture.ems.emstraining.validation;
 
-import com.accenture.ems.emstraining.model.dto.TrainingPostDTO;
+import com.accenture.ems.emstraining.model.dto.TrainingDTO;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class ValidDateRangeValidator implements ConstraintValidator<ValidDateRange, TrainingPostDTO> {
+public class ValidDateRangeValidator implements ConstraintValidator<ValidDateRange, TrainingDTO> {
 
     @Override
-    public boolean isValid(TrainingPostDTO value, ConstraintValidatorContext context) {
+    public boolean isValid(TrainingDTO value, ConstraintValidatorContext context) {
         if (value == null || value.getStartDate() == null || value.getEndDate() == null) {
             return true;
         }

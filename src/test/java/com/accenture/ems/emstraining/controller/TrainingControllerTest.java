@@ -1,8 +1,6 @@
 package com.accenture.ems.emstraining.controller;
 
-import com.accenture.ems.emstraining.model.dto.TrainingPostDTO;
-import com.accenture.ems.emstraining.model.dto.TrainingResponseDTO;
-import com.accenture.ems.emstraining.model.dto.TrainingTypeResponseDTO;
+import com.accenture.ems.emstraining.model.dto.TrainingDTO;
 import com.accenture.ems.emstraining.service.TrainingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,37 +33,23 @@ public class TrainingControllerTest {
     @MockBean
     private TrainingService service;
 
-    private TrainingResponseDTO mockTrainingResponseDTO;
-    private TrainingPostDTO mockTrainingPostDTO;
+    private TrainingDTO mockTrainingDTO;
 
     @BeforeEach
     public void setUp() {
-        mockTrainingResponseDTO = TrainingResponseDTO
+        mockTrainingDTO = TrainingDTO
                 .builder()
                 .id(1L)
                 .name("Test Course")
                 .startDate(Instant.EPOCH)
                 .endDate(Instant.MAX)
-                .trainingType(TrainingTypeResponseDTO
-                        .builder()
-                        .id(1L)
-                        .type("type1")
-                        .build())
-                .build();
-        mockTrainingPostDTO = TrainingPostDTO
-                .builder()
-                .name(mockTrainingResponseDTO.getName())
-                .startDate(mockTrainingResponseDTO.getStartDate())
-                .endDate(mockTrainingResponseDTO.getEndDate())
-                .trainingTypeId(mockTrainingResponseDTO
-                        .getTrainingType()
-                        .getId())
+                .trainingTypeId(1L)
                 .build();
     }
 
     @Test
     public void testOkGetAll() throws Exception {
-        when(service.getAll()).thenReturn(Collections.singletonList(mockTrainingResponseDTO));
+        when(service.getAll()).thenReturn(Collections.singletonList(mockTrainingDTO));
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/api/v1/training")
@@ -75,20 +59,15 @@ public class TrainingControllerTest {
                 .perform(requestBuilder)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$.[0].id").value(mockTrainingResponseDTO.getId()))
-                .andExpect(jsonPath("$.[0].name").value(mockTrainingResponseDTO.getName()))
-                .andExpect(jsonPath("$.[0].startDate").value(mockTrainingResponseDTO
+                .andExpect(jsonPath("$.[0].id").value(mockTrainingDTO.getId()))
+                .andExpect(jsonPath("$.[0].name").value(mockTrainingDTO.getName()))
+                .andExpect(jsonPath("$.[0].startDate").value(mockTrainingDTO
                         .getStartDate()
                         .toString()))
-                .andExpect(jsonPath("$.[0].endDate").value(mockTrainingResponseDTO
+                .andExpect(jsonPath("$.[0].endDate").value(mockTrainingDTO
                         .getEndDate()
                         .toString()))
-                .andExpect(jsonPath("$.[0].trainingType.id").value(mockTrainingResponseDTO
-                        .getTrainingType()
-                        .getId()))
-                .andExpect(jsonPath("$.[0].trainingType.type").value(mockTrainingResponseDTO
-                        .getTrainingType()
-                        .getType()));
+                .andExpect(jsonPath("$.[0].trainingTypeId").value(mockTrainingDTO.getTrainingTypeId()));
     }
 
     @Test
@@ -107,7 +86,7 @@ public class TrainingControllerTest {
 
     @Test
     public void testOkGetById() throws Exception {
-        when(service.getById(mockTrainingResponseDTO.getId())).thenReturn(Optional.of(mockTrainingResponseDTO));
+        when(service.getById(mockTrainingDTO.getId())).thenReturn(Optional.of(mockTrainingDTO));
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/api/v1/training/1")
@@ -115,20 +94,15 @@ public class TrainingControllerTest {
         mockMvc
                 .perform(requestBuilder)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(mockTrainingResponseDTO.getId()))
-                .andExpect(jsonPath("$.name").value(mockTrainingResponseDTO.getName()))
-                .andExpect(jsonPath("$.startDate").value(mockTrainingResponseDTO
+                .andExpect(jsonPath("$.id").value(mockTrainingDTO.getId()))
+                .andExpect(jsonPath("$.name").value(mockTrainingDTO.getName()))
+                .andExpect(jsonPath("$.startDate").value(mockTrainingDTO
                         .getStartDate()
                         .toString()))
-                .andExpect(jsonPath("$.endDate").value(mockTrainingResponseDTO
+                .andExpect(jsonPath("$.endDate").value(mockTrainingDTO
                         .getEndDate()
                         .toString()))
-                .andExpect(jsonPath("$.trainingType.id").value(mockTrainingResponseDTO
-                        .getTrainingType()
-                        .getId()))
-                .andExpect(jsonPath("$.trainingType.type").value(mockTrainingResponseDTO
-                        .getTrainingType()
-                        .getType()));
+                .andExpect(jsonPath("$.trainingTypeId").value(mockTrainingDTO.getTrainingTypeId()));
     }
 
     @Test
@@ -172,70 +146,60 @@ public class TrainingControllerTest {
 
     @Test
     public void testOkCreate() throws Exception {
-        when(service.create(eq(mockTrainingPostDTO))).thenReturn(mockTrainingResponseDTO);
+        when(service.create(eq(mockTrainingDTO))).thenReturn(mockTrainingDTO);
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/api/v1/training")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(mockTrainingPostDTO))
+                .content(objectMapper.writeValueAsString(mockTrainingDTO))
                 .accept(MediaType.APPLICATION_JSON);
 
         mockMvc
                 .perform(requestBuilder)
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(mockTrainingResponseDTO.getId()))
-                .andExpect(jsonPath("$.name").value(mockTrainingResponseDTO.getName()))
-                .andExpect(jsonPath("$.startDate").value(mockTrainingResponseDTO
+                .andExpect(jsonPath("$.id").value(mockTrainingDTO.getId()))
+                .andExpect(jsonPath("$.name").value(mockTrainingDTO.getName()))
+                .andExpect(jsonPath("$.startDate").value(mockTrainingDTO
                         .getStartDate()
                         .toString()))
-                .andExpect(jsonPath("$.endDate").value(mockTrainingResponseDTO
+                .andExpect(jsonPath("$.endDate").value(mockTrainingDTO
                         .getEndDate()
                         .toString()))
-                .andExpect(jsonPath("$.trainingType.id").value(mockTrainingResponseDTO
-                        .getTrainingType()
-                        .getId()))
-                .andExpect(jsonPath("$.trainingType.type").value(mockTrainingResponseDTO
-                        .getTrainingType()
-                        .getType()));
+                .andExpect(jsonPath("$.trainingTypeId").value(mockTrainingDTO.getTrainingTypeId()));
     }
 
     @Test
     public void testOkUpdateById() throws Exception {
-        when(service.updateById(eq(mockTrainingResponseDTO.getId()), eq(mockTrainingPostDTO))).thenReturn(Optional.of(mockTrainingResponseDTO));
+        when(service.updateById(eq(mockTrainingDTO.getId()), eq(mockTrainingDTO))).thenReturn(Optional.of(mockTrainingDTO));
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .put("/api/v1/training/{id}", mockTrainingResponseDTO.getId())
+                .put("/api/v1/training/{id}", mockTrainingDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(mockTrainingPostDTO))
+                .content(objectMapper.writeValueAsString(mockTrainingDTO))
                 .accept(MediaType.APPLICATION_JSON);
 
         mockMvc
                 .perform(requestBuilder)
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(mockTrainingResponseDTO.getId()))
-                .andExpect(jsonPath("$.name").value(mockTrainingResponseDTO.getName()))
-                .andExpect(jsonPath("$.startDate").value(mockTrainingResponseDTO
+                .andExpect(jsonPath("$.id").value(mockTrainingDTO.getId()))
+                .andExpect(jsonPath("$.name").value(mockTrainingDTO.getName()))
+                .andExpect(jsonPath("$.startDate").value(mockTrainingDTO
                         .getStartDate()
                         .toString()))
-                .andExpect(jsonPath("$.endDate").value(mockTrainingResponseDTO
+                .andExpect(jsonPath("$.endDate").value(mockTrainingDTO
                         .getEndDate()
                         .toString()))
-                .andExpect(jsonPath("$.trainingType.id").value(mockTrainingResponseDTO
-                        .getTrainingType()
-                        .getId()))
-                .andExpect(jsonPath("$.trainingType.type").value(mockTrainingResponseDTO
-                        .getTrainingType()
-                        .getType()));
+                .andExpect(jsonPath("$.trainingTypeId").value(mockTrainingDTO.getTrainingTypeId()));
     }
 
     @Test
     public void testWrongTypeUpdateById() throws Exception {
-        when(service.updateById(eq(mockTrainingResponseDTO.getId()), eq(mockTrainingPostDTO))).thenReturn(Optional.empty());
+        when(service.updateById(eq(mockTrainingDTO.getId()), eq(mockTrainingDTO))).thenReturn(Optional.empty());
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .put("/api/v1/training/{id}",  mockTrainingResponseDTO.getId())
+                .put("/api/v1/training/{id}", mockTrainingDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(mockTrainingPostDTO))
+                .content(objectMapper.writeValueAsString(mockTrainingDTO))
                 .accept(MediaType.APPLICATION_JSON);
 
         mockMvc

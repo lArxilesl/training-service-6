@@ -11,10 +11,10 @@ import java.util.Optional;
 
 @Repository
 public interface TrainingRepository extends JpaRepository<Training, Long> {
-    @Query("SELECT t FROM Training t JOIN FETCH t.trainingType")
-    List<Training> findAllWithType();
-
-    @Query("SELECT t FROM Training t JOIN FETCH t.trainingType WHERE t.id=:id")
-    Optional<Training> findByIdWithType(@Param("id") Long id);
+//    @Query("SELECT t FROM Training t JOIN FETCH t.trainingType")
+//    List<Training> findAllWithType();
+//
+//    @Query("SELECT t FROM Training t JOIN FETCH t.trainingType WHERE t.id=:id")
+//    Optional<Training> findByIdWithType(@Param("id") Long id);
 
 }

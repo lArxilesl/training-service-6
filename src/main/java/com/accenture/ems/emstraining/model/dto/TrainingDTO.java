@@ -16,7 +16,8 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrainingPostDTO {
+public class TrainingDTO {
+    private Long id;
     @NotEmpty(message = "Training name should not be empty")
     @Size(min = 1, max = 200, message = "Training name should be at least 1 character and at most 200 characters")
     private String name;
