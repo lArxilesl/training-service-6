@@ -32,12 +32,12 @@ dependencies {
 	implementation 'junit:junit:4.12'
 	compileOnly 'org.projectlombok:lombok'
 	implementation 'org.jetbrains:annotations:20.1.0'
-	implementation 'org.mockito:mockito-core:+'
-	compile group: 'org.mockito', name: 'mockito-core', version: '+'
+//	implementation 'org.mockito:mockito-core:+'
+//	compile group: 'org.mockito', name: 'mockito-core', version: '+'
 	runtimeOnly 'mysql:mysql-connector-java'
 	annotationProcessor 'org.projectlombok:lombok'
 	implementation group: 'commons-collections', name: 'commons-collections', version: '3.2.2'
-	testImplementation 'org.mockito:mockito-core:2.1.0'
+//	testImplementation 'org.mockito:mockito-core:2.1.0'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
