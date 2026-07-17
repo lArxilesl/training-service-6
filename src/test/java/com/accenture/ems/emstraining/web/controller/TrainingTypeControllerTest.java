@@ -1,5 +1,5 @@
 package com.accenture.ems.emstraining.web.controller;
-/*
+
 import com.accenture.ems.emstraining.business.service.TrainingTypeService;
 import com.accenture.ems.emstraining.model.TrainingType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,9 +23,9 @@ import java.util.Collections;
 import java.util.Optional;
 
 @WebMvcTest(TrainingTypeController.class)
-@AutoConfigureMockMvc*/
+@AutoConfigureMockMvc
 public class TrainingTypeControllerTest {
-   /* @Autowired
+    @Autowired
     MockMvc mockMvc;
     @MockBean
     TrainingTypeService TrainingTypeService;
@@ -73,5 +73,5 @@ public class TrainingTypeControllerTest {
         doNothing().when(TrainingTypeService).deleteTrainingType(1);
 
         mockMvc.perform(delete("/training/1")).andExpect(status().isOk());
-    }*/
+    }
 }
