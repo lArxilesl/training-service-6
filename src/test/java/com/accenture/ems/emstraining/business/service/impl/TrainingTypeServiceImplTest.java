@@ -1,5 +1,5 @@
 package com.accenture.ems.emstraining.business.service.impl;
-/*
+
 import com.accenture.ems.emstraining.business.repository.TrainingTypeRepository;
 import com.accenture.ems.emstraining.business.repository.dao.TrainingTypeDAO;
 import com.accenture.ems.emstraining.exceptions.TrainingTypeNotFoundException;
@@ -16,10 +16,10 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;*/
+import static org.mockito.Mockito.*;
 
 public class TrainingTypeServiceImplTest {
-   /* @Mock
+    @Mock
     TrainingTypeRepository TrainingTypeRepository;
     @InjectMocks
     TrainingTypeServiceImpl TrainingTypeService;
@@ -65,5 +65,5 @@ public class TrainingTypeServiceImplTest {
     public void deleteTrainingType_notFound_throwsException(){
         when(TrainingTypeRepository.existsById(1)).thenReturn(false);
         assertThrows(TrainingTypeNotFoundException.class,()-> TrainingTypeService.deleteTrainingType(1));
-    }*/
+    }
 }
