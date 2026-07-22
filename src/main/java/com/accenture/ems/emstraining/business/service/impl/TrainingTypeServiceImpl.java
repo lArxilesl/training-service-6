@@ -17,28 +17,30 @@ import java.util.Optional;
 @Slf4j
 public class TrainingTypeServiceImpl implements TrainingTypeService {
     private final TrainingTypeRepository TrainingTypeRepository;
+    private final TrainingTypeMapper trainingTypeMapper;
 
-    public TrainingTypeServiceImpl(TrainingTypeRepository TrainingTypeRepository) {
+    public TrainingTypeServiceImpl(TrainingTypeRepository TrainingTypeRepository, TrainingTypeMapper trainingTypeMapper) {
         this.TrainingTypeRepository = TrainingTypeRepository;
+        this.trainingTypeMapper = trainingTypeMapper;
     }
 
     @Override
     public Optional<TrainingType> getTrainingTypeById(Integer Id) {
         log.info("TrainingType id: {}",Id);
-        return TrainingTypeRepository.findById(Id).map(TrainingTypeMapper::mapFromDAO);
+        return TrainingTypeRepository.findById(Id).map(trainingTypeMapper::mapFromDAO);
     }
 
     @Override
     public List<TrainingType> getAll() {
         log.info("Getting all TrainingTypes: ");
-        return TrainingTypeMapper.mapListFromDAO(TrainingTypeRepository.findAll());
+        return trainingTypeMapper.mapListFromDAO(TrainingTypeRepository.findAll());
     }
 
     @Override
     public void saveTrainingType(TrainingType TrainingType) {
         log.info("Saving TrainingType: {}", TrainingType.getType());
         try{
-            TrainingTypeRepository.save(TrainingTypeMapper.mapToDAO(TrainingType));
+            TrainingTypeRepository.save(trainingTypeMapper.mapToDAO(TrainingType));
         } catch (Exception e){
             log.error("Error saving TrainingType: {}", e.getMessage());
             throw new TrainingTypeServiceException("Error while saving TrainingType: ");
@@ -49,9 +51,9 @@ public class TrainingTypeServiceImpl implements TrainingTypeService {
     public TrainingType updateTrainingType(Integer Id, TrainingType TrainingType) {
         log.info("Updating TrainingType id: {}",Id);
         TrainingTypeRepository.findById(Id).orElseThrow(() -> new TrainingTypeNotFoundException("It is not found! "));
-        TrainingTypeDAO TrainingTypeDAO = TrainingTypeMapper.mapToDAO(TrainingType);
+        TrainingTypeDAO TrainingTypeDAO = trainingTypeMapper.mapToDAO(TrainingType);
         TrainingTypeDAO.setId(Id);
-        return TrainingTypeMapper.mapFromDAO(TrainingTypeRepository.save(TrainingTypeDAO));
+        return trainingTypeMapper.mapFromDAO(TrainingTypeRepository.save(TrainingTypeDAO));
     }
 
     @Override
