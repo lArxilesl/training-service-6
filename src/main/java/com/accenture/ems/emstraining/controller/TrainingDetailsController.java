@@ -97,6 +97,11 @@ public class TrainingDetailsController {
     @DeleteMapping("/{trainingDetailsId}")
     public ResponseEntity<TrainingDetailsDTO> deleteTrainingDetails(@PathVariable Long trainingDetailsId) {
         log.info("Received request to delete training details with id: {}", trainingDetailsId);
+        Optional<TrainingDetailsDTO> trainingDetailsDTO = trainingDetailsService.getTrainingDetailsById(trainingDetailsId);
+        if(!trainingDetailsDTO.isPresent()){
+            log.warn("Training details with id {} was not found", trainingDetailsId);
+            return ResponseEntity.notFound().build();
+        }
         trainingDetailsService.deleteTrainingDetails(trainingDetailsId);
         log.info("Training details with id {} deleted", trainingDetailsId);
 
